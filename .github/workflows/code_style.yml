@@ -1,0 +1,39 @@
+name: Code Style Check
+
+on:
+  push:
+    branches:
+      - master
+      - feature-*
+      - issue-*
+  pull_request:
+
+jobs:
+  code_style:
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install Dependencies
+        run: sudo apt-get update; sudo apt-get install libarchive-dev libb2-dev liblz4-dev libacl1-dev libzstd-dev nettle-dev
+      - uses: actions/checkout@v4
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: nightly
+          override: true
+          components: rustfmt
+
+      - name: Run cargo fmt
+        uses: actions-rs/cargo@v1
+        with:
+          command: fmt
+          args: --all -- --check
+
+      - uses: actions-rs/toolchain@v1
+        with:
+          toolchain: 1.65.0 # MSRV
+          override: true
+          components: clippy
+
+      - uses: actions-rs/clippy-check@v1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          args: --all-features --all --tests -- -D clippy::all
