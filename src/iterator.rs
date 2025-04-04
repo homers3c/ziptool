@@ -107,9 +107,9 @@ impl<R: Read + Seek> Iterator for ArchiveIterator<R> {
     fn next(&mut self) -> Option<Self::Item> {
         debug_assert!(!self.closed);
 
-        if self.error {
-            return None;
-        }
+        // if self.error {
+        //     return None;
+        // }
 
         loop {
             let next = if self.in_file {
@@ -141,7 +141,8 @@ impl<R: Read + Seek> Iterator for ArchiveIterator<R> {
                 }
                 ArchiveContents::EndOfEntry => break None,
                 ArchiveContents::Err(_) => {
-                    self.error = true;
+                    // self.error = true;
+                    self.in_file = false;
                     break Some(next);
                 }
             }
@@ -153,9 +154,9 @@ impl<R: Read + Seek> ArchiveIterator<R> {
     pub fn next_header(&mut self) -> Option<ArchiveContents> {
         debug_assert!(!self.closed);
 
-        if self.error {
-            return None;
-        }
+        // if self.error {
+        //     return None;
+        // }
 
         let next = unsafe { self.unsafe_next_header() };
 
@@ -171,7 +172,8 @@ impl<R: Read + Seek> ArchiveIterator<R> {
                 Some(next)
             }
             ArchiveContents::Err(_) => {
-                self.error = true;
+                // self.error = true;
+                self.in_file = false;
                 Some(next)
             }
             _ => None,
